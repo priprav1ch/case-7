@@ -1,27 +1,44 @@
-name: Helm CI/CD
+name: Deploy to Kubernetes with Helm
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          cluster_name: kind-cluster
+
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
           version: 'v3.12.0'
 
-      - name: Lint Helm Chart
-        run: helm lint ./helm
-
-      - name: Simulate Deploy
+      - name: Build Docker image
         run: |
-          echo "Deploying to Kubernetes with Helm..."
-          echo "helm upgrade --install my-release ./helm"
-          echo "Deployment simulated successfully."
+          docker build -t priprav1ch228/my-app:latest .
+
+      - name: Load image into kind
+        run: |
+          kind load docker-image priprav1ch228/my-app:latest --name kind-cluster
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install my-release ./helm \
+            --set image.repository=priprav1ch228/my-app \
+            --set image.tag=latest
+
+      - name: Verify Deployment
+        run: |
+          echo "Ожидаем запуска подов..."
+          sleep 15
+          kubectl get pods
+          kubectl get services
