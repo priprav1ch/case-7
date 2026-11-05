@@ -8,6 +8,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mydb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,12 +45,10 @@ jobs:
         run: |
           kind load docker-image priprav1ch228/my-app:latest --name kind-cluster
 
-      - name: Run Database Migrations
+      - name: Run Database Migrations with Flyway
         run: |
-          echo "Применение миграций базы данных..."
-          echo "Найдена миграция: migrations/V1__Create_users_table.sql"
-          echo "Выполнение: CREATE TABLE users (...)"
-          echo "Миграция успешно применена!"
+          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.22.3/flyway-commandline-9.22.3-linux-x64.tar.gz | tar xvz
+          ./flyway-9.22.3/flyway -url=jdbc:postgresql://localhost:5432/mydb -user=user -password=password -locations=filesystem:migrations migrate
 
       - name: Clean up old release
         run: |
