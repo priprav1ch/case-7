@@ -30,6 +30,11 @@ jobs:
         run: |
           kind load docker-image priprav1ch228/my-app:latest --name kind-cluster
 
+      - name: Verify image in cluster
+        run: |
+          echo "Проверяем наличие образа в кластере..."
+          docker exec kind-cluster-control-plane crictl images | grep my-app || echo "ОБРАЗ НЕ НАЙДЕН В КЛАСТЕРЕ!"
+
       - name: Clean up old release
         run: |
           helm uninstall my-release || true
