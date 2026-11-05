@@ -1,0 +1,8 @@
+replicaCount: 2
+image:
+  repository: priprav1ch228/my-app
+  tag: latest
+  pullPolicy: Always
+service:
+  type: ClusterIP
+  port: 80
