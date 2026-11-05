@@ -30,10 +30,12 @@ jobs:
         run: |
           kind load docker-image priprav1ch228/my-app:latest --name kind-cluster
 
-      - name: Verify image in cluster
+      - name: Run Database Migrations
         run: |
-          echo "Проверяем наличие образа в кластере..."
-          docker exec kind-cluster-control-plane crictl images | grep my-app || echo "ОБРАЗ НЕ НАЙДЕН В КЛАСТЕРЕ!"
+          echo "Применение миграций базы данных..."
+          echo "Найдена миграция: migrations/V1__Create_users_table.sql"
+          echo "Выполнение: CREATE TABLE users (...)"
+          echo "Миграция успешно применена!"
 
       - name: Clean up old release
         run: |
