@@ -30,6 +30,10 @@ jobs:
         run: |
           kind load docker-image priprav1ch228/my-app:latest --name kind-cluster
 
+      - name: Clean up old release
+        run: |
+          helm uninstall my-release || true
+
       - name: Deploy with Helm
         run: |
           helm upgrade --install my-release ./helm \
@@ -39,6 +43,6 @@ jobs:
       - name: Verify Deployment
         run: |
           echo "Ожидаем запуска подов..."
-          sleep 15
+          sleep 20
           kubectl get pods
           kubectl get services
